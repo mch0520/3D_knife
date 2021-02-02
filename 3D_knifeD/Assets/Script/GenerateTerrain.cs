@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class GenerateTerrain : MonoBehaviour
 {
-    int heightScale=5;
-    float detailScale=5.0f;
+    int heightScale = 5;
+    float detailScale = 5.0f;
 
 
     void Start()
@@ -14,13 +14,16 @@ public class GenerateTerrain : MonoBehaviour
         Vector3[] vertices = mesh.vertices;
         for (int v = 0; v < vertices.Length; v++)
         {
-            vertices[v].y=Mathf.PerlinNoise((vertices[v].x+transform.position.x)/detailScale,
-                (vertices[v].z)+transform.position.z) / detailScale)+deightScale;
-        }
+            vertices[v].y = Mathf.PerlinNoise((vertices[v].x + transform.position.x) / detailScale,
+                (vertices[v].z) + transform.position.z) / detailScale)+(new Vector3)(0, heightScale, 0);
+
+        mesh.vertices = vertices;
+        mesh.RecalcvlatoBounds();
+        mesh.RecalcvlatoNormals();
     }
 
     void Update()
     {
-        
+
     }
 }
