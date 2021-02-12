@@ -81,9 +81,14 @@ public class MoveJoyStick : MonoBehaviour
         playerAC = GameObject.Find("PlayerACamera").GetComponent<Camera>();
         playerA = GameObject.Find("remy@Withdrawing Sword").GetComponent<Rigidbody>();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         joyBG = GameObject.Find("JoyStickBackGround");
         joyStick = GameObject.Find("JoyStick");
     }
+=======
+        joyBG = GameObject.Find("JoyStickBackGround").GetComponent<RectTransform>(); ;
+        joyStick = GameObject.Find("JoyStick").GetComponent<RectTransform>(); ;
+>>>>>>> Stashed changes
 =======
         joyBG = GameObject.Find("JoyStickBackGround").GetComponent<RectTransform>(); ;
         joyStick = GameObject.Find("JoyStick").GetComponent<RectTransform>(); ;
