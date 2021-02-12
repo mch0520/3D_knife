@@ -9,9 +9,9 @@ public class MoveJoyStick : MonoBehaviour
 {
     #region  欄位
     [Header("搖桿")]
-    public GameObject joyStick;
+    public RectTransform joyStick;
     [Header("搖桿背景圖範圍"), Tooltip("JoyStickBackGround背景圖")]
-    public GameObject joyBG;
+    public RectTransform joyBG;
     [Header("搖桿半徑")]
     public float jyRadiu;
     //搖桿離背景圖中心的距離
@@ -80,9 +80,14 @@ public class MoveJoyStick : MonoBehaviour
         anim = GetComponent<Animation>();
         playerAC = GameObject.Find("PlayerACamera").GetComponent<Camera>();
         playerA = GameObject.Find("remy@Withdrawing Sword").GetComponent<Rigidbody>();
+<<<<<<< Updated upstream
         joyBG = GameObject.Find("JoyStickBackGround");
         joyStick = GameObject.Find("JoyStick");
     }
+=======
+        joyBG = GameObject.Find("JoyStickBackGround").GetComponent<RectTransform>(); ;
+        joyStick = GameObject.Find("JoyStick").GetComponent<RectTransform>(); ;
+>>>>>>> Stashed changes
 
     void Start()
     {
@@ -119,6 +124,13 @@ public class MoveJoyStick : MonoBehaviour
     }
 
     #region 方法
+    public void OnDrag()
+    {
+       // transform.position = (Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 100)));
+       //滑鼠
+        transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
+    }
+
     /// <summary>
     ///角色轉身
     /// </summary>
