@@ -1,0 +1,2 @@
+C:\Users\張哲豪\unity3d\3D_knife\3D_knifeD\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+C:\Users\張哲豪\unity3d\3D_knife\3D_knifeD\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache

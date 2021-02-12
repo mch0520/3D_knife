@@ -9,9 +9,9 @@ public class MoveJoyStick : MonoBehaviour
 {
     #region  欄位
     [Header("搖桿")]
-    public RectTransform joyStick;
+    public GameObject joyStick;
     [Header("搖桿背景圖範圍"), Tooltip("JoyStickBackGround背景圖")]
-    public RectTransform joyBG;
+    public GameObject joyBG;
     [Header("搖桿半徑")]
     public float jyRadiu;
     //搖桿離背景圖中心的距離
@@ -50,6 +50,8 @@ public class MoveJoyStick : MonoBehaviour
     private float playerRotate = 0;
     //敵人的武器角度
     float armathB;
+    //未移動被玩家撞時，發呆
+    float dazeTime;
 
     //玩家自己的攝影機 視角
     public Camera playerAC;
@@ -63,8 +65,12 @@ public class MoveJoyStick : MonoBehaviour
     private Vector3 cameraY2;
     //第一人稱
 
-    //是否離開地面
-    bool vacate = false;
+    //是否落在地板上
+    bool isGround = true;
+    //球體偵測範圍
+    public float radius;
+    //偏移量
+    public Vector3 offset;
 
     //頓下的時間
     float squatTime;
@@ -77,25 +83,16 @@ public class MoveJoyStick : MonoBehaviour
 
     private void Awake()
     {
-        anim = GetComponent<Animation>();
+        anim = GetComponent<Animator>();
         playerAC = GameObject.Find("PlayerACamera").GetComponent<Camera>();
         playerA = GameObject.Find("remy@Withdrawing Sword").GetComponent<Rigidbody>();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         joyBG = GameObject.Find("JoyStickBackGround");
         joyStick = GameObject.Find("JoyStick");
     }
-=======
-        joyBG = GameObject.Find("JoyStickBackGround").GetComponent<RectTransform>(); ;
-        joyStick = GameObject.Find("JoyStick").GetComponent<RectTransform>(); ;
->>>>>>> Stashed changes
-=======
-        joyBG = GameObject.Find("JoyStickBackGround").GetComponent<RectTransform>(); ;
-        joyStick = GameObject.Find("JoyStick").GetComponent<RectTransform>(); ;
->>>>>>> Stashed changes
 
     void Start()
     {
+        AttackJoyStick = GetComponent<AttackJoyStick>();
         startPos = joyStick.transform.position;
         startSpeed = speed;
     }
@@ -114,28 +111,25 @@ public class MoveJoyStick : MonoBehaviour
         }
 
         FirstPersonPerspective();
+
+        //發呆時間
+        if (dazeTime >= 2)
+        {
+            dazeTime = 0;
+        }
     }
 
-    //判斷是否 落下地板，要調整
+    //判斷是否 落下地板
     void FixedUpdate()
     {
-        //偵測是否離開地面
-        if (Physics.Raycast(playerA.transform.position, Vector3.forward, 0.1f, 1 >> 8))
-        {
-            vacate = false;
-        }
-
-
+        //碰撞物件陣列=物理.球體碰撞範圍(中心點,半徑,圖層)
+        Collider[] hit = Physics.OverlapSphere(transform.position + offset, radius, 1 << 8);
+        //如果 碰撞物件陣列數量>0 並且 存在 設定為在地板上
+        if (hit.Length > 0 && hit[0]) isGround = true;
+        else isGround = false;
     }
 
     #region 方法
-    public void OnDrag()
-    {
-       // transform.position = (Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 100)));
-       //滑鼠
-        transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
-    }
-
     /// <summary>
     ///角色轉身
     /// </summary>
@@ -255,32 +249,31 @@ public class MoveJoyStick : MonoBehaviour
         switch (Mathf.Round((walkRotate - 67.5f) / 45))
         {
             case 0:
-                anim.Play("walk正前");
+                anim.SetBool("walk正前");
                 break;
             case 1:
-                anim.Play("walk左前");
+                anim.SetBool("walk左前");
                 break;
             case 2:
-                anim.Play("walk正左");
+                anim.SetBool("walk正左");
                 break;
             case 3:
-                anim.Play("walk左下");
+                anim.SetBool("walk左下");
                 break;
             case 4:
-                anim.Play("walk正下");
+                anim.SetBool("walk正下");
                 break;
             case 5:
-                anim.Play("walk右下");
+                anim.SetBool("walk右下");
                 break;
             case 6:
-                anim.Play("walk正右");
+                anim.SetBool("walk正右");
                 break;
             case 7:
-                anim.Play("walk右上");
+                anim.SetBool("walk右上");
                 break;
         }
     }
-
 
     /// <summary>
     /// 跨步
@@ -347,7 +340,7 @@ public class MoveJoyStick : MonoBehaviour
     }
 
     /// <summary>
-    /// 第一人稱視角，轉頭未實用，要調整
+    /// 第一人稱視角
     /// </summary>
     void FirstPersonPerspective()
     {
@@ -367,37 +360,42 @@ public class MoveJoyStick : MonoBehaviour
         //播放轉頭動畫
 
     }
-
     #endregion
 
     #region 事件
     /// <summary>
-    /// 玩家碰撞玩家，被擊退。玩家被武器攻擊，扣生命。
+    /// 玩家未移動被撞speed=0,移動中被撞不為0。玩家被武器攻擊，扣生命。武器碰撞武器另外寫腳本，要調整
     /// </summary>
     /// <param name="playerB"></param>
     void OnColliderEnter(Collider playerB)
     {
         if (playerB.gameObject.tag == "玩家")
         {
-            speed = 0;
-            anim.Play("back");
-            if (anim["back"].normalizedSpeed == 1)
+            if (anim.GetBool("idle"))
             {
-                speed = startSpeed;
+                speed = 0;
+                dazeTime = 1;
+                anim.SetTrigger("被撞觸發");
             }
+            else speed = startSpeed;
         }
 
         if (playerB.gameObject.tag == "武器")
         {
             health -= 1;
-
+            anim.SetTrigger("受傷觸發");
         }
+    }
+
+    void OnColliderExit(Collider playerB)
+    {
+        if (dazeTime == 1) dazeTime += Time.deltaltime;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         //如果 射線檢測 點擊 在搖桿區域內 才能使用
-        if (Mathf.Abs((Input.GetTouch(0).deltaPosition).x - startPos.x) < jyRadiu||Mathf.Abs((Input.GetTouch(0).deltaPosition).y - startPos.y) < jyRadiu)
+        if (Mathf.Abs((Input.GetTouch(0).deltaPosition).x - startPos.x) < jyRadiu || Mathf.Abs((Input.GetTouch(0).deltaPosition).y - startPos.y) < jyRadiu)
         {
             joyStick.transform.position = Input.GetTouch(0).position;
             //搖桿與原點 的向量
@@ -415,7 +413,7 @@ public class MoveJoyStick : MonoBehaviour
         if (mode == 1)
         {
             //格擋時不能移動，並且有 敵人的攻擊角度armathB
-            if (anim["back"].normalizedSpeed != 0 && anim["back"].normalizedSpeed != 1)
+            if (AttackJoyStick.pary)
             {
                 if (speed == 0)
                 {
@@ -444,7 +442,7 @@ public class MoveJoyStick : MonoBehaviour
                 //站立
                 if (squatTime < 0)
                 {
-                    anim.Play("站立");
+                    anim.SetBool("站立");
                     squatTime = 0;
                 }
                 if (anim["蹲下"].normalizedSpeed == 1)
@@ -455,7 +453,7 @@ public class MoveJoyStick : MonoBehaviour
                 //蹲下
                 if (squatTime > 0)
                 {
-                    anim.Play("蹲下");
+                    anim.SetTrigger("蹲下");
                     squatTime = 0;
                 }
                 if (anim["蹲下"].normalizedSpeed == 0)
@@ -493,8 +491,8 @@ public class MoveJoyStick : MonoBehaviour
                 //角色物件 跟 攝影機 同向
                 playerA.transform.forward = playerAC.transform.forward;
                 //蹲下走路。角色根據攝影機方向 相對移動
-                playerA.velocity = (x * playerAC.transform.right + y * playerAC.transform.forward) * 0.6f * speed;
-                anim.Play("蹲下走");
+                playerA.velocity = (x * playerAC.transform.right + y * playerAC.transform.forward) * 0.6f * speed + transform.transform.up * playerA.velocity.y;
+                anim.SetBool("蹲下走");
                 jump = false;
             }
             else if (x > 0.6f || y > 0)
@@ -505,7 +503,7 @@ public class MoveJoyStick : MonoBehaviour
                 playerA.transform.forward = playerAC.transform.forward;
                 //跑步。角色根據攝影機方向 相對移動
                 playerA.velocity = (x * playerAC.transform.right + y * playerAC.transform.forward) * 1.8f * speed;
-                anim.Play("run");
+                anim.SetBool("run");
                 jump = true;
             }
             else
@@ -521,11 +519,11 @@ public class MoveJoyStick : MonoBehaviour
         {
             outTouch = Input.GetTouch(0).position;
             //搖桿歸一化
-            cameraY2.x=(outTouch.x - startTouch.x) / jyRadiu*70 ;
-            cameraY2.y=(outTouch.y - startTouch.y)/jyRadiu*30 ;
+            cameraY2.x = (outTouch.x - startTouch.x) / jyRadiu * 70;
+            cameraY2.y = (outTouch.y - startTouch.y) / jyRadiu * 30;
 
-            Mathf.Clamp(cameraY2.x,-70,70);
-            Mathf.Clamp(cameraY2.y,-30,30);
+            Mathf.Clamp(cameraY2.x, -70, 70);
+            Mathf.Clamp(cameraY2.y, -30, 30);
         }
     }
 
@@ -534,9 +532,12 @@ public class MoveJoyStick : MonoBehaviour
         if (mode == 1)
         {
             //跳躍
-            if (!vacate && jump)
+            if (isGround && jump)
             {
-                playerA.velocity += new Vector3(0, 20, 0);
+                playerA.Sleep();
+                playerA.WakeUp();
+                playerA.AddForce(Vector3.up * 200);
+                anim.SetTrigger("跳躍觸發");
                 jump = false;
             }
 
