@@ -78,12 +78,33 @@ public class Mathfff : MonoBehaviour
     {
         for (int i = 0; i < 36; i++)
         {
-            if (mapBool[i-1]=true)
+            if (mapBool[i-1])
             {
                 //產生路障
 
                 //如果 地圖(第九層)相接 消除路障
-                Physics.Raycast(smallMapV2[i-1],smallMap[i-1].transform.up,mapSize+1,1<<9);
+                RaycastHit2D hit2DF= Physics2D.Raycast(smallMapV2[i-1],smallMap[i-1].transform.up,mapSize*2+1,1<<9);
+                if(hit2DF.transform.parent.name=="前路障")
+                {
+                    Destroy(map[i].transform.GetChild(0));
+                    Destroy(hit2DF.transform.parent);
+                }
+                if (hit2DF.transform.parent.name == "後路障")
+                {
+                    Destroy(map[i].transform.GetChild(1));
+                    Destroy(hit2DF.transform.parent);
+                }
+                RaycastHit2D hit2DR = Physics2D.Raycast(smallMapV2[i - 1], smallMap[i - 1].transform.right, mapSize * 2 + 1, 1 << 9);
+                if (hit2DR.transform.parent.name == "左路障")
+                {
+                    Destroy(map[i].transform.GetChild(2));
+                    Destroy(hit2DR.transform.parent);
+                }
+                if (hit2DR.transform.parent.name == "右路障")
+                {
+                    Destroy(map[i].transform.GetChild(3));
+                    Destroy(hit2DR.transform.parent);
+                }
 
             }
         }
