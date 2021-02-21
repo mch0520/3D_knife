@@ -116,11 +116,20 @@ public class Mathfff : MonoBehaviour
 
     private void OnMove()
     {
+        //檢測點選物件是不是 小地圖
         RaycastHit2D hit2DF = Physics2D.Raycast(Input.GetTouch(0).position, transform.up, 0, 1 << 9);
         if (hit2DF.transform.parent.tag == "smallMap" || Input.GetTouch(0).position.y < 700)
         {
-            //小地圖的座標=點擊座標
-            hit2DF.transform.position = Input.GetTouch(0).position;
+            //檢測四角有無阻擋
+            RaycastHit2D mapLF = Physics2D.Raycast((Vector2)hit2DF.transform.position + new Vector2(-mapSize, mapSize), transform.up, 0.1f);
+            RaycastHit2D mapLB = Physics2D.Raycast((Vector2)hit2DF.transform.position + new Vector2(-mapSize, -mapSize), transform.up, 0.1f);
+            RaycastHit2D mapRF = Physics2D.Raycast((Vector2)hit2DF.transform.position + new Vector2(mapSize, mapSize), transform.up, 0.1f);
+            RaycastHit2D mapRB = Physics2D.Raycast((Vector2)hit2DF.transform.position + new Vector2(mapSize, -mapSize), transform.up, 0.1f);
+            if (!mapLF || mapLB || mapRF || mapRB)
+            {
+                //小地圖的座標=點擊座標
+                hit2DF.transform.position = Input.GetTouch(0).position;
+            }
         }
     }
 
